@@ -1,6 +1,9 @@
 from django.db import models
 from django.core.validators import MaxLengthValidator , MinLengthValidator
 import uuid
+from users.models import User ,UserInfo
+from django.dispatch import receiver
+from django.db.models.signals import post_save
 
 
 class Level (models.TextChoices):
@@ -122,20 +125,21 @@ class ProgramExersice(models.Model):
     
     slug = models.SlugField(null=True , blank=True , max_length=60)
     
+    user = models.ForeignKey(User , on_delete=models.CASCADE )
     
-    program_day = models.ForeignKey(ProgramDay,on_delete=models.CASCADE,related_name='exersices')
+    program_day = models.ForeignKey(ProgramDay,on_delete=models.CASCADE,related_name='exersices',null=True , blank=True)
     
-    exersice = models.ManyToManyField(Exersice,related_name='program_exersices')
+    exersice = models.ManyToManyField(Exersice,related_name='program_exersices',null=True , blank=True)
     
-    order = models.PositiveIntegerField()
+    order = models.PositiveIntegerField(null=True , blank=True)
     
-    sets = models.PositiveIntegerField()
+    sets = models.PositiveIntegerField(null=True , blank=True)
     
-    min_reps = models.PositiveIntegerField()
+    min_reps = models.PositiveIntegerField(null=True , blank=True)
     
-    max_reps = models.PositiveIntegerField()
+    max_reps = models.PositiveIntegerField(null=True , blank=True)
     
-    rest_minutes = models.PositiveIntegerField()
+    rest_minutes = models.PositiveIntegerField(null=True , blank=True)
     
     
     class Meta:
@@ -145,3 +149,13 @@ class ProgramExersice(models.Model):
         
     def __str__(self):
         return f"{self.program_day} : {self.exersice}"
+    
+    
+    
+@receiver(post_save ,sender=User)
+def create_program(sender , instance , created ,**kw ):
+    
+    if created:
+        ProgramExersice.objects.create(
+            user=instance
+        )

@@ -1,73 +1,187 @@
 from rest_framework.response import Response
-from .models import (Equipment,SecondryMuscle,Split,ProgramDay,
-                     ProgramTemlate,ProgramExersice,Exersice)
-from .serializer import (EquipmentSerializer,SecondryMuscleSerializer,SpiltSerializer,
-                         ProgramDaySerializer,ProgramTemlateSerializer,ProgramExrsiceSerializer,ExersiceSerializer)
+from .models import  *
+from .serializer import *
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework import generics
 from django.shortcuts import redirect
+from rest_framework.permissions import BasePermission ,IsAdminUser, IsAuthenticated
+from users.views import IsCoach
 
-class SplitListView(generics.ListAPIView):
-    """ TO View All Splits And Descrip It """
     
-    
-    queryset = Split.objects.all()
-    
-    serializer_class = SpiltSerializer
 
 
-class CreateProgramExersiceView(generics.CreateAPIView):
-    """ To Create Progarm Exersice """
+class CreateListSplitVIew(APIView):
     
-    queryset = ProgramExersice.objects.all()
+    # permission_classes = [IsAdminUser | IsCoach]
     
-    serializer_class = ProgramExrsiceSerializer
-    
-    
-class UpdateProgramExersiceView(APIView):
-    """ To Custimize Program Exersice """
-    
-    def put (self , request , slug ,*warg , **kwars):
-        """ This Method To Update It  """
+    def get (self , request , *wargs , **kwargs):
         
-        query = ProgramExersice.objects.get(slug=slug)
+        splits = Split.objects.all()
+        serialize = SpiltSerializer(splits,many=True)
+       
+        return Response(serialize.data,status=status.HTTP_200_OK)
+    
+    def post(self , request , *wargs , **kwargs):
         
-        serializer = ProgramExrsiceSerializer(query, data=request.data)
+        serialize = SpiltSerializer(data=request.data)
+        
+        if serialize.is_valid():
+            serialize.save()
+            
+            return Response({"Massege":"The Split Created Successfuly"},status.HTTP_201_CREATED)
+        
+        return Response({"massege":"Error This Is Not Valid"},status=status.HTTP_400_BAD_REQUEST)
+    
+    
+    
+    
+    
+class UpdateDeleteSplitView(APIView):
+    
+    # permission_classes = [IsAdminUser]
+    
+    def put (self , request , split ,*wargs , **kwargs):
+        try:
+            
+            split = Split.objects.get(split_type__icontains=split)
+            
+        except:
+            return Response({"massege":"The Split Not Found"})
+        serializer = SpiltSerializer(split , data = request.data)
         
         if serializer.is_valid():
-            
             serializer.save()
             
-            # Massege if serializer Valid
-            return Response({"Massege":"It Updated Successfuly"}, status=status.HTTP_202_ACCEPTED)
+            return Response({"Massege":"The Split Updated Successfuly"},status.HTTP_202_ACCEPTED)
+            
+        return Response({"massege":"Error This Is Not Valid"},status=status.HTTP_400_BAD_REQUEST)
+      
+    def delete (self , request , split ,*wargs , **kwargs):       
+        try:
+            
+            split = Split.objects.get(split_type__icontains=split)
+            
+        except:
+            return Response({"massege":"The Split Not Found"})
         
-        # Massege if Not Valid
-        return Response(serializer.errors)
+        split.delete()
+        
+        return Response({"massege":"The Split Deleted Successfuly"},status=status.HTTP_200_OK)
+        
+        
+class SecondryMuscleListCreateView(generics.ListCreateAPIView):
     
-    def delete (self , request , slug, *warg , **kwars):
-        """ This Method To Delete It  """
-        
-        
-        query = ProgramExersice.objects.get(slug = slug)
-        
-        query.delete()
-        
-        return Response({"massege":"It Deleted Successfuly"}, status=status.HTTP_200_OK)
+    # permission_classes = [IsAdminUser , IsCoach]  
+    
+    queryset = SecondryMuscle.objects.all()
+    
+    serializer_class = SecondryMuscleSerializer 
+
+class SecondryMusclePutDelete(generics.RetrieveUpdateDestroyAPIView):
+    
+    # permission_classes = [IsAdminUser]
+    
+    queryset = SecondryMuscle.objects.all()
+    
+    serializer_class = SecondryMuscleSerializer
+    
+    lookup_field = 'name'
     
 
 
-class ExersicesListView(generics.ListAPIView):
-    """ For View All Exersices in System And Show The Details Of Every One Exersice """
+        
+class ExersiceListCreateView(generics.ListCreateAPIView):
+    
+    # permission_classes = [IsAdminUser , IsCoach]  
+    
+    queryset = Exersice.objects.all()
+    
+    serializer_class = ExersiceSerializer 
+    
+class ExersicePutDelete(generics.RetrieveUpdateDestroyAPIView):
+    
+    # permission_classes = [IsAdminUser]
     
     queryset = Exersice.objects.all()
     
     serializer_class = ExersiceSerializer
+    
+    lookup_field = 'name'
+    
+    
+
+    
+class ProgramTempleteListCreateView(generics.ListCreateAPIView):
+    
+    # permission_classes = [IsAdminUser , IsCoach]  
+    
+    queryset = ProgramTemlate.objects.all()
+    
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return ProgramTemlateSerializerCreate
+        
+        return ProgramTemlateSerializer
+    
+class ProgramTempletePutDelete(generics.RetrieveUpdateDestroyAPIView):
+    
+    # permission_classes = [IsAdminUser]
+    
+    queryset = ProgramTemlate.objects.all()
+    
+    serializer_class = ProgramTemlateSerializerCreate
+    
+    lookup_field = 'name'
+    
+    
+    
+    
+class ProgramDayteListCreateView(generics.ListCreateAPIView):
+    
+    # permission_classes = [IsAdminUser , IsCoach]  
+    
+    queryset = ProgramDay.objects.all()
+    
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return ProgramDaySerializerCreate
+        
+        return ProgramDaySerializer
+    
+class ProgramDayPutDelete(generics.RetrieveUpdateDestroyAPIView):
+    
+    # permission_classes = [IsAdminUser]
+    
+    queryset = ProgramDay.objects.all()
+    
+    serializer_class = ProgramDaySerializerCreate
+    
+    lookup_field = 'name'
 
 
-class EquipmentListView(generics.ListAPIView):
-    """ To View All Equipments """
+
     
-    queryset = Equipment.objects.all()
+class ProgramExersiceteListCreateView(generics.ListCreateAPIView):
     
-    serializer_class = EquipmentSerializer
+    # permission_classes = [IsAdminUser , IsCoach]  
+    
+    queryset = ProgramExersice.objects.all()
+    
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return ProgramExrsiceSerializerCreate
+        
+        return ProgramExrsiceSerializer    
+class ProgramExersicePutDelete(generics.RetrieveUpdateDestroyAPIView):
+    
+    # permission_classes = [IsAdminUser]
+    
+    queryset = ProgramExersice.objects.all()
+    
+    serializer_class = ProgramExrsiceSerializerCreate
+    
+    lookup_field = 'slug'
+    
+
+    

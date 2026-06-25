@@ -26,10 +26,13 @@ class SpiltSerializer(serializers.ModelSerializer):
         fields = ['id' , 'split_type' , 'description']
         
         
+class ProgramTemlateSerializerCreate(serializers.ModelSerializer):
+    class Meta:
+        model = ProgramTemlate
+        fields = ['id', 'name' , 'split' , 'level' , 'description']
 
 class ProgramTemlateSerializer(serializers.ModelSerializer):
-    
-    split = serializers.StringRelatedField(read_only=True)  # To Show Split Name Of It Program
+    split = serializers.StringRelatedField(read_only=True)
     
     class Meta:
         model = ProgramTemlate
@@ -38,14 +41,16 @@ class ProgramTemlateSerializer(serializers.ModelSerializer):
         
         
 class ProgramDaySerializer(serializers.ModelSerializer):
-    
     program = serializers.StringRelatedField(read_only=True) # To Show Program Tempalte Name Of It Program
-    
     
     class Meta:
         model = ProgramDay
         fields = ['id' , 'name' ,'program' , 'order']
-
+class ProgramDaySerializerCreate(serializers.ModelSerializer):
+    
+    class Meta:
+        model = ProgramDay
+        fields = ['id' , 'name' ,'program' , 'order']
 
 class ProgramExrsiceSerializer(serializers.ModelSerializer):
     
@@ -53,6 +58,16 @@ class ProgramExrsiceSerializer(serializers.ModelSerializer):
     
     program_day = serializers.StringRelatedField(read_only=True) # To Show Program Day Name
     
+    user = serializers.StringRelatedField(read_only=True)
+    
     class Meta:
         model = ProgramExersice
-        fields = ['id' ,'slug' , 'program_day' ,'exersice', 'min_reps', 'max_reps' , 'sets' , 'order']
+        fields = ['id' ,'slug' ,'user', 'program_day' ,'exersice', 'min_reps', 'max_reps' , 'sets' , 'order']
+
+class ProgramExrsiceSerializerCreate(serializers.ModelSerializer):
+    
+
+    
+    class Meta:
+        model = ProgramExersice
+        fields = ['id' ,'slug' , 'user', 'program_day' ,'exersice', 'min_reps', 'max_reps' , 'sets' , 'order', 'rest_minutes']

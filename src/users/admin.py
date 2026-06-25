@@ -17,9 +17,9 @@ class User(admin.ModelAdmin):
 @admin.register(UserProfile)
 class UserProfile(admin.ModelAdmin):
     
-    list_display = ('age' ,'last_name', 'user' , 'tall' , 'weight' , 'gender' )
+    list_display = ('age' ,'last_name', 'user' , 'hight' , 'weight' , 'gender' , 'tdee' ,'bmr', 'bmi' , 'activety')
     
-    list_editable = ('tall', 'weight' , 'gender' )
+    list_editable = ('hight', 'weight' , 'gender'  , 'activety')
     
     list_display_links = ('age' , 'user' , 'last_name')
     
@@ -28,4 +28,13 @@ class UserProfile(admin.ModelAdmin):
     search_fields = ('last_name', )
     
    
-admin.site.register(UserInfo)
+@admin.register(UserInfo)
+class UserInfo(admin.ModelAdmin):
+    
+    list_display = ('profile' , 'goal', 'target_goal' , 'target_protein_g', 'target_carbs_g', 'target_creatine_g', )
+    
+    list_display_links = ('profile', )
+    
+    list_editable = ('goal', )
+    
+    

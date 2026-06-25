@@ -1,6 +1,7 @@
 
 import os
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -30,11 +31,43 @@ INSTALLED_APPS = [
     # Apps 
     'users.apps.UsersConfig',
     'workouts.apps.WorkoutsConfig',
-    'subscriptions.apps.SubscriptionsConfig',
     'nutrition.apps.NutritionConfig',
     # Api
     'rest_framework',
+    'rest_framework_simplejwt',
+    
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+SIMPLE_JWT = {
+    # عمر الـ Access Token (يفضل يكون قصير لحماية البيانات - مثلاً 5 دقائق أو ساعة)
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=120),
+    
+    # عمر الـ Refresh Token (بيستخدم عشان يطلب Access Token جديد بدون ما المستخدم يسجل دخول تاني)
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
+    
+    # السماح بتدوير الـ Refresh Tokens (أمان أعلى)
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    
+    # نوع الـ Header اللي بيبعته الـ Frontend في الـ Request
+    # بيبقى كدة: Authorization: Bearer <your_token>
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
+    
+    # الحقل اللي بيتعرف بيه على المستخدم في الـ Token
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+    
+    # مفتاح التشفير (بيستخدم الـ SECRET_KEY الخاص بمشروع Django)
+    'SIGNING_KEY': SECRET_KEY,
+    'ALGORITHM': 'HS256',
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -46,6 +79,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
 ROOT_URLCONF = 'project.urls'
 
 TEMPLATES = [
@@ -120,9 +157,12 @@ STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR,'static')
 STATICFILES_DIRS=[
     
+    os.path.join(BASE_DIR , 'users.static'),
+    os.path.join(BASE_DIR , 'workouts.static'),
+    os.path.join(BASE_DIR , 'nutrition.static'),
 ]
 
-MEDIA_ROOT = 'media/'
+MEDIA_ROOT = os.path.join(BASE_DIR,'media')
 MEDIA_URL = 'media/'
 
 # Default primary key field type
@@ -131,3 +171,6 @@ MEDIA_URL = 'media/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'users.User'
+
+
+LOGOUT_REDIRECT_URL = 'sign_up'
